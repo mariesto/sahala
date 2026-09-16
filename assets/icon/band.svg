@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="36.6%" y1="0%" x2="63.4%" y2="100%">
+      <stop offset="0%" stop-color="#1e232c"/>
+      <stop offset="55%" stop-color="#14181f"/>
+      <stop offset="100%" stop-color="#0f1218"/>
+    </linearGradient>
+    <pattern id="lat1" width="33" height="33" patternUnits="userSpaceOnUse" patternTransform="rotate(45 512 512)">
+      <line x1="0" y1="0" x2="0" y2="33" stroke="#cfa45f" stroke-opacity="0.35" stroke-width="3"/>
+    </pattern>
+    <pattern id="lat2" width="33" height="33" patternUnits="userSpaceOnUse" patternTransform="rotate(-45 512 512)">
+      <line x1="0" y1="0" x2="0" y2="33" stroke="#cfa45f" stroke-opacity="0.35" stroke-width="3"/>
+    </pattern>
+    <clipPath id="sq">
+      <rect x="100" y="100" width="824" height="824" rx="190"/>
+    </clipPath>
+    <filter id="fx" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="-2" stdDeviation="0" flood-color="#000000" flood-opacity="0.7"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#000000" flood-opacity="0.5"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="20" flood-color="#e2ac57" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="190" fill="url(#bg)"/>
+  <g clip-path="url(#sq)">
+    <g transform="rotate(45 512 512)">
+      <rect x="-288" y="388.5" width="1600" height="247" fill="#cfa45f" fill-opacity="0.10"/>
+      <rect x="-288" y="388.5" width="1600" height="247" fill="url(#lat1)"/>
+      <rect x="-288" y="388.5" width="1600" height="247" fill="url(#lat2)"/>
+      <rect x="-288" y="386.5" width="1600" height="4" fill="#cfa45f" fill-opacity="0.5"/>
+      <rect x="-288" y="633.5" width="1600" height="4" fill="#cfa45f" fill-opacity="0.5"/>
+    </g>
+  </g>
+  <g font-family="Noto Sans Batak" font-size="214" fill="#e2ac57" filter="url(#fx)">
+    <text x="252" y="399">ᯘ</text>
+    <text x="413" y="592">ᯂ</text>
+    <text x="586" y="786">ᯞ</text>
+  </g>
+</svg>

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="36.6%" y1="0%" x2="63.4%" y2="100%">
+      <stop offset="0%" stop-color="#1e232c"/>
+      <stop offset="55%" stop-color="#14181f"/>
+      <stop offset="100%" stop-color="#0f1218"/>
+    </linearGradient>
+    <pattern id="lat1" width="31" height="31" patternUnits="userSpaceOnUse" patternTransform="rotate(45 512 512)">
+      <line x1="0" y1="0" x2="0" y2="31" stroke="#cfa45f" stroke-opacity="0.20" stroke-width="3"/>
+    </pattern>
+    <pattern id="lat2" width="31" height="31" patternUnits="userSpaceOnUse" patternTransform="rotate(-45 512 512)">
+      <line x1="0" y1="0" x2="0" y2="31" stroke="#cfa45f" stroke-opacity="0.20" stroke-width="3"/>
+    </pattern>
+    <radialGradient id="well" gradientUnits="userSpaceOnUse" cx="512" cy="512" r="460">
+      <stop offset="0%" stop-color="#11141a" stop-opacity="0.95"/>
+      <stop offset="38%" stop-color="#11141a" stop-opacity="0.95"/>
+      <stop offset="62%" stop-color="#11141a" stop-opacity="0.35"/>
+      <stop offset="74%" stop-color="#11141a" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="fx" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="-2" stdDeviation="0" flood-color="#000000" flood-opacity="0.7"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#000000" flood-opacity="0.5"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="20" flood-color="#e2ac57" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="190" fill="url(#bg)"/>
+  <rect x="105" y="105" width="814" height="814" rx="186" fill="none" stroke="#000000" stroke-opacity="0.35" stroke-width="10"/>
+  <rect x="103" y="103" width="818" height="818" rx="188" fill="none" stroke="#cfa45f" stroke-opacity="0.45" stroke-width="3"/>
+  <circle cx="512" cy="512" r="330" fill="#cfa45f" fill-opacity="0.06"/>
+  <circle cx="512" cy="512" r="330" fill="url(#lat1)"/>
+  <circle cx="512" cy="512" r="330" fill="url(#lat2)"/>
+  <circle cx="512" cy="512" r="330" fill="url(#well)"/>
+  <circle cx="512" cy="512" r="330" fill="none" stroke="#cfa45f" stroke-opacity="0.55" stroke-width="4"/>
+  <circle cx="512" cy="512" r="312" fill="none" stroke="#cfa45f" stroke-opacity="0.3" stroke-width="3"/>
+  <rect x="501.5" y="153.5" width="21" height="21" fill="#cfa45f" transform="rotate(45 512 164)"/>
+  <rect x="501.5" y="849.5" width="21" height="21" fill="#cfa45f" transform="rotate(45 512 860)"/>
+  <rect x="153.5" y="501.5" width="21" height="21" fill="#cfa45f" fill-opacity="0.5" transform="rotate(45 164 512)"/>
+  <rect x="849.5" y="501.5" width="21" height="21" fill="#cfa45f" fill-opacity="0.5" transform="rotate(45 860 512)"/>
+  <g font-family="Noto Sans Batak" font-size="148" fill="#e2ac57" filter="url(#fx)">
+    <text x="322" y="416">ᯘ</text>
+    <text x="440" y="556">ᯂ</text>
+    <text x="557" y="696">ᯞ</text>
+  </g>
+</svg>

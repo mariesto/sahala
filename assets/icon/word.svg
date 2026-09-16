@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="36.6%" y1="0%" x2="63.4%" y2="100%">
+      <stop offset="0%" stop-color="#1e232c"/>
+      <stop offset="55%" stop-color="#14181f"/>
+      <stop offset="100%" stop-color="#0f1218"/>
+    </linearGradient>
+    <filter id="fx" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="-2" stdDeviation="0" flood-color="#000000" flood-opacity="0.7"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#000000" flood-opacity="0.5"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="20" flood-color="#e2ac57" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="190" fill="url(#bg)"/>
+  <text x="512" y="530" text-anchor="middle" font-family="Noto Sans Batak" font-size="216" fill="#e2ac57" filter="url(#fx)">ᯘᯂᯞ</text>
+  <rect x="339" y="620" width="346" height="10" rx="5" fill="#cfa45f"/>
+  <rect x="390.5" y="654" width="243" height="8" rx="4" fill="#cfa45f" fill-opacity="0.55"/>
+</svg>

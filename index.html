@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sahala</title>
+    <script type="module" src="/src/main.ts" defer></script>
+  </head>
+
+  <body>
+    <header id="toolbar" data-tauri-drag-region>
+      <div id="file-info" data-tauri-drag-region>
+        <div id="file-pill">
+          <span id="file-name" title="Click to rename">untitled.md</span>
+          <span class="pill-divider"></span>
+          <span id="save-state">Not saved</span>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btn-theme" title="Theme">
+          <span class="swatches" id="theme-swatches"></span>
+          <span id="theme-name">Toba</span>
+          <span class="chev">▾</span>
+        </button>
+        <button id="btn-guide" title="Markdown guide (⌘\)">Guide</button>
+        <button id="btn-open" title="Open (⌘O)">Open</button>
+      </div>
+    </header>
+
+    <main id="split">
+      <section id="editor-pane"></section>
+      <div id="divider" title="Drag to resize · double-click to reset">
+        <span class="handle"></span>
+      </div>
+      <section id="preview-pane">
+        <article id="preview" class="markdown-body"></article>
+      </section>
+      <aside id="cheatsheet" aria-label="Markdown guide">
+        <div class="cs-inner">
+          <header>
+            <span>Markdown guide</span>
+            <button id="btn-guide-close" title="Close (Esc)">✕</button>
+          </header>
+          <div id="cheatsheet-body"></div>
+          <footer id="cheatsheet-footer">
+            <div class="cs-section-title">Shortcuts</div>
+            <div class="cs-shortcuts">
+              <kbd>⌘O</kbd><span>Open file</span>
+              <kbd>⌘S</kbd><span>Save now</span>
+              <kbd>⌘\</kbd><span>Toggle guide</span>
+              <kbd>Esc</kbd><span>Close guide</span>
+            </div>
+          </footer>
+        </div>
+      </aside>
+    </main>
+
+    <footer id="statusbar">
+      <span id="doc-stats">0 words</span>
+      <span class="status-right">
+        <span id="cursor-pos">Ln 1, Col 1</span>
+        <button id="sync-toggle" title="Toggle scroll sync">Sync scroll · on</button>
+      </span>
+    </footer>
+
+    <div id="theme-menu" hidden></div>
+
+    <div id="icon-modal" hidden>
+      <div class="modal-card">
+        <header>
+          <span>App icon</span>
+          <button id="icon-modal-close" title="Close">✕</button>
+        </header>
+        <p class="modal-caption">Changes the Dock and window icon. Takes effect immediately.</p>
+        <div id="icon-grid"></div>
+      </div>
+    </div>
+  </body>
+</html>

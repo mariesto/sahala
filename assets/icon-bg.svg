@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#232833"/>
+      <stop offset="0.55" stop-color="#161920"/>
+      <stop offset="1" stop-color="#0d0f13"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e8b45e" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#d4a24e" stop-opacity="0.15"/>
+    </linearGradient>
+  </defs>
+  <!-- Apple icon grid: 824x824 rounded rect centered on 1024 canvas -->
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#bg)"/>
+  <rect x="112" y="112" width="800" height="800" rx="176" fill="none" stroke="url(#ring)" stroke-width="6"/>
+  <!-- subtle gorga-inspired baseline strokes -->
+  <path d="M 300 812 H 724" stroke="#d4a24e" stroke-width="10" stroke-linecap="round" opacity="0.85"/>
+  <path d="M 360 850 H 664" stroke="#d4a24e" stroke-width="6" stroke-linecap="round" opacity="0.4"/>
+</svg>

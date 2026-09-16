@@ -46,86 +46,18 @@ const WELCOME = `# Horas! 🙌
 
 Welcome to **Sahala** — a tiny markdown editor.
 
-- Open a file with **⌘O** — after that, auto-save has your back
-- Type on the left, watch the right
-- Drag the divider to resize, pick a theme from the toolbar
+- Open a file with **⌘O** — or just drop one on the window; after that, auto-save has your back
+- **⌘P** brings back your recent files — Sahala also reopens your last file on launch
+- **⌘\\\\** docks a markdown guide — click any syntax chip to insert it
+- Type on the left, watch the right; drag the divider to resize
+- Click the filename to rename it; themes follow your macOS appearance
 
 | Feature | Status |
 | ------- | ------ |
 | Live preview | ✅ |
-| GFM tables | ✅ |
-| Task lists | ✅ |
-
-## Code preview
-
-\`\`\`typescript
-type Tondi = { name: string; strength: number };
-
-const strengthen = <T extends Tondi>(t: T): T => ({
-  ...t,
-  strength: Math.min(t.strength * 1.5, 100),
-});
-
-const datu = strengthen({ name: "Datu Parngongo", strength: 62 });
-console.log(\`\${datu.name} radiates sahala at \${datu.strength}\`);
-\`\`\`
-
-\`\`\`rust
-#[derive(Debug)]
-enum Script {
-    Surat,
-    Latin,
-}
-
-fn carve(text: &str, script: Script) -> Result<String, String> {
-    match script {
-        Script::Surat => Ok(format!("ᯘ {text} ᯘ")),
-        Script::Latin => Err("a pustaha deserves surat batak".into()),
-    }
-}
-
-fn main() {
-    println!("{:?}", carve("horas", Script::Surat));
-}
-\`\`\`
-
-\`\`\`go
-package main
-
-import "fmt"
-
-func main() {
-	gondang := make(chan string, 3)
-	go func() {
-		for _, beat := range []string{"tak", "tung", "dum"} {
-			gondang <- beat
-		}
-		close(gondang)
-	}()
-	for beat := range gondang {
-		fmt.Println("🥁", beat)
-	}
-}
-\`\`\`
-
-\`\`\`java
-import java.util.List;
-
-record Ulos(String pattern, boolean sacred) {}
-
-class Mangulosi {
-    public static void main(String[] args) {
-        var gifts = List.of(
-            new Ulos("ragidup", true),
-            new Ulos("sibolang", true),
-            new Ulos("plain", false)
-        );
-        gifts.stream()
-             .filter(Ulos::sacred)
-             .forEach(u -> System.out.println("wrapped in " + u.pattern()));
-    }
-}
-\`\`\`
+| Recent files (⌘P) | ✅ |
+| Markdown guide (⌘\\\\) | ✅ |
+| GFM tables & task lists | ✅ |
 `;
 
 // ── Save state (filename pill) ───────────────
@@ -276,6 +208,7 @@ function loadDocument(text: string, path: string | null) {
   // The dispatch above schedules an auto-save against the old path — cancel it.
   clearTimeout(autoSaveTimer);
   currentPath = path;
+  if (path) addRecent(path);
   const name = path ? baseName(path) : "untitled.md";
   fileNameEl.textContent = name;
   setWindowTitle(name);
@@ -323,6 +256,7 @@ async function saveFile() {
   try {
     await invoke("write_file", { path, contents: view.state.doc.toString() });
     currentPath = path;
+    addRecent(path);
     const name = baseName(path);
     fileNameEl.textContent = name;
     setWindowTitle(name);
@@ -358,6 +292,8 @@ fileNameEl.addEventListener("click", () => {
       const newPath = dir + name;
       try {
         await invoke("rename_file", { from: currentPath, to: newPath });
+        removeRecent(currentPath);
+        addRecent(newPath);
         currentPath = newPath;
         fileNameEl.textContent = name;
         setWindowTitle(name);
@@ -379,6 +315,140 @@ fileNameEl.addEventListener("click", () => {
     e.stopPropagation();
   });
   input.addEventListener("blur", () => finish(true));
+});
+
+// ── Recent files + quick switcher (⌘P) ──────
+// Persistence is plain localStorage: a JSON array of absolute paths,
+// most-recent-first, capped — no database needed at this scale.
+const RECENTS_KEY = "sahala:recents";
+const RECENTS_MAX = 15;
+
+function getRecents(): string[] {
+  try {
+    const raw = JSON.parse(localStorage.getItem(RECENTS_KEY) ?? "[]");
+    return Array.isArray(raw) ? raw.filter((p) => typeof p === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function addRecent(path: string) {
+  const list = [path, ...getRecents().filter((p) => p !== path)].slice(0, RECENTS_MAX);
+  localStorage.setItem(RECENTS_KEY, JSON.stringify(list));
+}
+
+function removeRecent(path: string) {
+  localStorage.setItem(RECENTS_KEY, JSON.stringify(getRecents().filter((p) => p !== path)));
+}
+
+// Open a known path directly (palette, drag-drop, Finder, session restore).
+async function openPath(path: string): Promise<boolean> {
+  try {
+    const text = await invoke<string>("read_file", { path });
+    loadDocument(text, path);
+    return true;
+  } catch {
+    removeRecent(path); // moved or deleted — self-evict
+    return false;
+  }
+}
+
+const paletteEl = document.querySelector<HTMLElement>("#palette")!;
+const paletteInput = document.querySelector<HTMLInputElement>("#palette-input")!;
+const paletteList = document.querySelector<HTMLElement>("#palette-list")!;
+let paletteSel = 0;
+let paletteMatches: string[] = [];
+
+function fuzzyScore(query: string, path: string): number {
+  const q = query.toLowerCase();
+  if (!q) return 1;
+  const base = (path.split("/").pop() ?? "").toLowerCase();
+  const full = path.toLowerCase();
+  if (base.startsWith(q)) return 4;
+  if (base.includes(q)) return 3;
+  if (full.includes(q)) return 2;
+  let i = 0;
+  for (const ch of full) if (ch === q[i]) i++;
+  return i >= q.length ? 1 : 0;
+}
+
+function renderPalette() {
+  const q = paletteInput.value.trim();
+  paletteMatches = getRecents()
+    .map((p) => [p, fuzzyScore(q, p)] as const)
+    .filter(([, s]) => s > 0)
+    .sort((a, b) => b[1] - a[1]) // stable: recency preserved within a score
+    .map(([p]) => p);
+  paletteSel = Math.min(paletteSel, Math.max(0, paletteMatches.length - 1));
+
+  paletteList.innerHTML = "";
+  if (paletteMatches.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "palette-empty";
+    empty.textContent = getRecents().length
+      ? "No matches"
+      : "No recent files yet — open one with ⌘O";
+    paletteList.appendChild(empty);
+    return;
+  }
+  paletteMatches.forEach((p, i) => {
+    const row = document.createElement("button");
+    row.className = `palette-row${i === paletteSel ? " selected" : ""}`;
+    const name = document.createElement("span");
+    name.className = "p-name";
+    name.textContent = p.split("/").pop() ?? p;
+    const dir = document.createElement("span");
+    dir.className = "p-dir";
+    dir.textContent = p.slice(0, p.lastIndexOf("/")).replace(/^\/Users\/[^/]+/, "~");
+    row.append(name, dir);
+    row.addEventListener("click", () => pickPalette(i));
+    paletteList.appendChild(row);
+  });
+}
+
+async function pickPalette(i: number) {
+  const path = paletteMatches[i];
+  if (!path) return;
+  if (await openPath(path)) closePalette();
+  else renderPalette(); // stale row evicted — keep the palette open
+}
+
+function openPalette() {
+  paletteSel = 0;
+  paletteInput.value = "";
+  renderPalette();
+  paletteEl.hidden = false;
+  paletteInput.focus();
+}
+
+function closePalette() {
+  paletteEl.hidden = true;
+  view.focus();
+}
+
+const isPaletteOpen = () => !paletteEl.hidden;
+
+paletteInput.addEventListener("input", () => {
+  paletteSel = 0;
+  renderPalette();
+});
+paletteInput.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    paletteSel = Math.min(paletteSel + 1, paletteMatches.length - 1);
+    renderPalette();
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    paletteSel = Math.max(paletteSel - 1, 0);
+    renderPalette();
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    pickPalette(paletteSel);
+  }
+  // Escape bubbles up to the window handler.
+});
+paletteEl.addEventListener("mousedown", (e) => {
+  if (e.target === paletteEl) closePalette();
 });
 
 // ── Themes ───────────────────────────────────
@@ -796,7 +866,44 @@ if (IN_TAURI && currentIcon() !== "seal") {
   if (urlParams.get("guide") === "1") setGuideOpen(true);
   if (urlParams.get("menu") === "1") openThemeMenu();
   if (urlParams.get("icons") === "1") openIconModal();
+  const seed = urlParams.get("seed-recents");
+  if (seed) localStorage.setItem(RECENTS_KEY, JSON.stringify(seed.split(",")));
+  if (urlParams.get("palette") === "1") openPalette();
 }
+
+// ── File intake: open-with, drag & drop, session restore ──
+async function initFileIntake() {
+  if (!IN_TAURI) return;
+  try {
+    // Files opened via Finder while the app is already running.
+    const { listen } = await import("@tauri-apps/api/event");
+    await listen<string[]>("open-file", (e) => {
+      const p = e.payload?.[0];
+      if (p) openPath(p);
+    });
+
+    // Native drag & drop onto the window (gives real filesystem paths).
+    const { getCurrentWebview } = await import("@tauri-apps/api/webview");
+    await getCurrentWebview().onDragDropEvent((e) => {
+      if (e.payload.type !== "drop") return;
+      const p =
+        e.payload.paths.find((x) => /\.(md|markdown|txt)$/i.test(x)) ?? e.payload.paths[0];
+      if (p) openPath(p);
+    });
+
+    // Cold start via file association: the Opened event fires before the
+    // frontend exists, so Rust buffers the paths for us to collect.
+    const pending = await invoke<string[]>("take_pending_open");
+    if (pending.length > 0 && (await openPath(pending[0]))) return;
+
+    // Nothing handed to us — restore the last edited file.
+    const [last] = getRecents();
+    if (last) await openPath(last);
+  } catch (e) {
+    console.error("File intake init failed:", e);
+  }
+}
+initFileIntake();
 
 // ── Resizable split ──────────────────────────
 const splitEl = document.querySelector<HTMLElement>("#split")!;
@@ -834,6 +941,7 @@ dividerEl.addEventListener("dblclick", () => {
 // ── Keyboard shortcuts ───────────────────────
 window.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
+    if (isPaletteOpen()) return closePalette();
     if (!iconModal.hidden) return closeIconModal();
     if (!themeMenuEl.hidden) return closeThemeMenu();
     if (isGuideOpen()) return setGuideOpen(false);
@@ -846,6 +954,10 @@ window.addEventListener("keydown", (e) => {
   } else if (e.key === "s") {
     e.preventDefault();
     saveFile();
+  } else if (e.key === "p") {
+    e.preventDefault();
+    if (isPaletteOpen()) closePalette();
+    else openPalette();
   } else if (e.key === "\\") {
     e.preventDefault();
     setGuideOpen(!isGuideOpen());

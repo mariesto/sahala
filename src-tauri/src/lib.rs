@@ -1,3 +1,14 @@
+use std::sync::Mutex;
+
+/// Files handed to us by macOS (file association / Dock drop) before the
+/// frontend was ready to receive events.
+struct PendingOpen(Mutex<Vec<String>>);
+
+#[tauri::command]
+fn take_pending_open(state: tauri::State<PendingOpen>) -> Vec<String> {
+    std::mem::take(&mut *state.0.lock().unwrap())
+}
+
 #[tauri::command]
 fn read_file(path: String) -> Result<String, String> {
     std::fs::read_to_string(&path).map_err(|e| format!("Failed to read {path}: {e}"))
@@ -67,15 +78,45 @@ fn set_dock_icon(path: &str) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let app = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
+        .manage(PendingOpen(Mutex::new(Vec::new())))
         .invoke_handler(tauri::generate_handler![
             read_file,
             write_file,
             rename_file,
-            set_app_icon
+            set_app_icon,
+            take_pending_open
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application");
+
+    app.run(|app_handle, event| {
+        #[cfg(target_os = "macos")]
+        if let tauri::RunEvent::Opened { urls } = event {
+            use tauri::{Emitter, Manager};
+            let paths: Vec<String> = urls
+                .iter()
+                .filter_map(|u| u.to_file_path().ok())
+                .map(|p| p.to_string_lossy().to_string())
+                .collect();
+            if paths.is_empty() {
+                return;
+            }
+            // Buffer for a cold start (frontend not loaded yet) and emit
+            // for the warm case (app already running).
+            app_handle
+                .state::<PendingOpen>()
+                .0
+                .lock()
+                .unwrap()
+                .extend(paths.clone());
+            let _ = app_handle.emit("open-file", paths);
+        }
+        #[cfg(not(target_os = "macos"))]
+        {
+            let _ = (&app_handle, &event);
+        }
+    });
 }

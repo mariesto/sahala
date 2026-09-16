@@ -59,6 +59,15 @@ Small tool. Strong *tondi*.
 - **Click the filename to rename** — commits the rename to disk in place,
   no Finder round-trip
 - **`⌘O`** opens via the native dialog; the window title follows the file
+- **`⌘P` quick switcher** — fuzzy-search your recent files and jump between
+  them without ever seeing a dialog
+- **Session restore** — launching Sahala reopens the file you were last
+  working on
+- **Finder is a first-class door**: Sahala registers as a markdown editor
+  (right-click → *Open With*), and you can drop a `.md` file anywhere on
+  the window to open it
+
+![Quick switcher — recent files on ⌘P](docs/screenshots/quick-switcher.png)
 
 ### 📖 Built-in markdown guide
 
@@ -116,6 +125,7 @@ Small tool. Strong *tondi*.
 | Key | Action |
 | --- | ------ |
 | `⌘O` | Open file |
+| `⌘P` | Recent files (quick switcher) |
 | `⌘S` | Save now / save as |
 | `⌘\` | Toggle markdown guide |
 | `Esc` | Close guide / menus |

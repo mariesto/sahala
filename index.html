@@ -47,6 +47,7 @@
             <div class="cs-section-title">Shortcuts</div>
             <div class="cs-shortcuts">
               <kbd>⌘O</kbd><span>Open file</span>
+              <kbd>⌘P</kbd><span>Recent files</span>
               <kbd>⌘S</kbd><span>Save now</span>
               <kbd>⌘\</kbd><span>Toggle guide</span>
               <kbd>Esc</kbd><span>Close guide</span>
@@ -65,6 +66,13 @@
     </footer>
 
     <div id="theme-menu" hidden></div>
+
+    <div id="palette" hidden>
+      <div class="palette-card">
+        <input id="palette-input" type="text" placeholder="Search recent files…" spellcheck="false" />
+        <div id="palette-list"></div>
+      </div>
+    </div>
 
     <div id="icon-modal" hidden>
       <div class="modal-card">

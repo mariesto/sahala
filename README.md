@@ -144,8 +144,10 @@ make check      # typecheck frontend (tsc) + backend (cargo check)
 make ship       # build → install to /Applications → launch
 ```
 
-Or step by step: `make build` (produces `Sahala.app` + a `.dmg` under
-`src-tauri/target/release/bundle/`), `make install`, `make run`.
+Or step by step: `make build` (produces `Sahala.app` under
+`src-tauri/target/release/bundle/macos/`), `make install`, `make run`.
+Need a shareable installer? `make dmg` builds the `.dmg` (a Finder window
+pops up while it assembles — that's the DMG being styled, ignore it).
 Regenerate the full icon set from the SVG sources with `make icons`.
 
 ## Stack

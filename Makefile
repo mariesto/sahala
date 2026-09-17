@@ -5,7 +5,7 @@ APP     := /Applications/Sahala.app
 BUNDLE  := src-tauri/target/release/bundle/macos/Sahala.app
 DMG_DIR := src-tauri/target/release/bundle/dmg
 
-.PHONY: help dev build install run ship check icons clean
+.PHONY: help dev build dmg install run ship check icons clean
 
 help: ## List available targets
 	@grep -E '^[a-z]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -13,11 +13,16 @@ help: ## List available targets
 dev: ## Run the app in dev mode (hot reload)
 	npm run tauri dev
 
-build: ## Build release bundle (sahala.app + .dmg)
+build: ## Build the release Sahala.app (no dmg — see `make dmg`)
+	npm run tauri build -- --bundles app
+
+dmg: ## Build the .dmg installer (a Finder window appears while it assembles — ignore it)
 	npm run tauri build
 
-install: ## Replace /Applications/sahala.app with the fresh build (quits it first)
+install: ## Replace /Applications/Sahala.app with the fresh build (quits it first)
 	-osascript -e 'tell application "Sahala" to quit' 2>/dev/null
+	@i=0; while pgrep -xq Sahala && [ $$i -lt 10 ]; do sleep 0.3; i=$$((i+1)); done; \
+	if pgrep -xq Sahala; then pkill -x Sahala; sleep 1; fi
 	rm -rf $(APP)
 	cp -R $(BUNDLE) $(APP)
 

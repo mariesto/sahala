@@ -163,7 +163,22 @@ setSaveState("unsaved");
 // ── Scroll sync (two-way, toggleable) ────────
 const syncToggleEl = document.querySelector<HTMLButtonElement>("#sync-toggle")!;
 let syncScroll = localStorage.getItem("sahala:sync") !== "off";
-let syncing = false;
+
+// Two-way sync without feedback: the pane the user is actually scrolling
+// "owns" the link until it goes quiet; scroll events on the other pane in
+// that window are echoes and get dropped. A per-event flag released on the
+// next frame is not enough — echoes can land later and bounce the panes
+// off each other (visible as jitter on slow scrolls).
+let syncDriver: "editor" | "preview" | null = null;
+let syncDriverTimer: ReturnType<typeof setTimeout> | undefined;
+
+function claimSyncDriver(who: "editor" | "preview"): boolean {
+  if (syncDriver && syncDriver !== who) return false;
+  syncDriver = who;
+  clearTimeout(syncDriverTimer);
+  syncDriverTimer = setTimeout(() => (syncDriver = null), 150);
+  return true;
+}
 
 function updateSyncToggle() {
   syncToggleEl.textContent = `Sync scroll · ${syncScroll ? "on" : "off"}`;
@@ -173,22 +188,19 @@ function updateSyncToggle() {
 function ratioSync(src: HTMLElement, dst: HTMLElement) {
   const max = src.scrollHeight - src.clientHeight;
   if (max <= 0) return;
-  const ratio = src.scrollTop / max;
-  dst.scrollTop = ratio * (dst.scrollHeight - dst.clientHeight);
+  const target = (src.scrollTop / max) * (dst.scrollHeight - dst.clientHeight);
+  if (Math.abs(dst.scrollTop - target) < 1) return; // close enough — no micro-nudges
+  dst.scrollTop = target;
 }
 
 view.scrollDOM.addEventListener("scroll", () => {
-  if (!syncScroll || syncing) return;
-  syncing = true;
+  if (!syncScroll || !claimSyncDriver("editor")) return;
   ratioSync(view.scrollDOM, previewPane);
-  requestAnimationFrame(() => (syncing = false));
 });
 
 previewPane.addEventListener("scroll", () => {
-  if (!syncScroll || syncing) return;
-  syncing = true;
+  if (!syncScroll || !claimSyncDriver("preview")) return;
   ratioSync(previewPane, view.scrollDOM);
-  requestAnimationFrame(() => (syncing = false));
 });
 
 syncToggleEl.addEventListener("click", () => {
